@@ -1,0 +1,5 @@
+**/target/
+site/client.js
+*.wasm
+*.gz
+*.zstd
