@@ -164,7 +164,7 @@ pub const SOFT_DROP_GRAVITY: u32 = 1;
 /// 2. The server may maintain multiple clients' game state.
 ///
 /// Also note that it is slightly different from milestone 1.
-#[derive(Component, Serialize, Deserialize, PartialEq, Eq, Reflect)]
+#[derive(Component, Serialize, Deserialize, PartialEq, Eq, Reflect, Debug)]
 pub struct SharedGameState {
     /// Total score so far
     pub score: u32,

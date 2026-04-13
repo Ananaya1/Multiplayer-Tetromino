@@ -18,6 +18,7 @@ use lightyear::prelude::{ControlledBy, RemoteId, Replicate};
 use crate::score::update_score;
 
 pub mod game_logic;
+pub mod net;
 pub mod score;
 #[cfg(test)]
 pub mod tests;

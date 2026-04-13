@@ -5,7 +5,6 @@ use std::collections::HashSet;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-
 /// Channel for keyboard inputs to send over the network.
 #[derive(Serialize, Deserialize, Debug, Default, PartialEq, Clone, Reflect)]
 pub struct InputChannel;

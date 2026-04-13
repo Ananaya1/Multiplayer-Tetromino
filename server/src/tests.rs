@@ -3,8 +3,13 @@
 use std::collections::HashSet;
 
 use bevy::prelude::*;
+use lightyear::prelude::Lifetime;
 
 use super::*;
+
+mod end_to_end;
+mod net;
+mod rr;
 
 #[derive(Component, Debug, PartialEq, Clone, Copy)]
 struct Foo;

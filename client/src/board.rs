@@ -1,6 +1,5 @@
 //! The tetris board setup
 
-
 use crate::ui::{BG_COLOR, PADDING};
 
 use bevy::prelude::*;

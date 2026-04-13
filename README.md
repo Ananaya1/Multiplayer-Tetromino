@@ -46,13 +46,18 @@ You need to make sure that you have the following installed:
 
 **This section will be filled once the test suite is released.**
 
-There are some tests for the server directory that you can run under the
-`server/` using `cargo nt` but the bulk of the tests will be released later in
-the week and you will run those through a different mechanism.
+There are no client tests.  You will show it via a live demo during interactive
+grading.
+
+There are tests for the server that you can run under the `server/` directory
+using `cargo nt`.  These tests check only if a single client is handled
+properly.  You should test with multiple clients, as that will be part of your
+demo.
 
 ### Running the tests
 
-**This section will be filled once the test suite is released.**
+You can run the server tests via `./test-server.sh`.  Alternatively, you can run
+`cargo nt -p server` directly.
 
 ### Debug client and debug server
 
@@ -96,9 +101,11 @@ compiled version of my server.
 │   └── src
 │       ├── game_logic.rs  # Core game logic, must support multiple clients
 │       ├── lib.rs         # Helpers for writing server-side game logic
-│       ├── main.rs        # Main server binary, handles initializing clients and firing input events
+│       ├── main.rs        # Main server binary
+│       ├── net.rs         # Networking code for the server, handles initializing clients and firing input events
 │       ├── score.rs       # Score event handler
-│       └── tests.rs       # Basic server unit tests
+│       ├── tests.rs       # Basic server unit tests
+│       └── tests/         # Additional test code
 └── site
     ├── config.json -> ../server/config.json
     └── index.html

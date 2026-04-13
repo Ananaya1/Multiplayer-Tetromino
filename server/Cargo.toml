@@ -7,7 +7,7 @@ edition.workspace = true
 bevy = { workspace = true, features = ["bevy_log"] }
 clap = { version = "4.5.60", features = ["derive"] }
 common = { version = "0.1.0", path = "../common" }
-lightyear = { workspace = true, features = ["server"] }
+lightyear = { workspace = true, features = ["server", "crossbeam"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
