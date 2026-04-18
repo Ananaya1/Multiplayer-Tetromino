@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "test/ci"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "test/ci"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -12,11 +12,56 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/usf272s26/test-box-blox-local:0.1.1
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deliberately fail until tests are released
-        run: false
+      - name: Log in to ghcr with read only access
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CLASSROOM_GHCR_TOKEN }}
+
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Pull ci environment
+        run: docker pull ghcr.io/usf272spring26/test-box-blox-wasm:0.0.2
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name ci \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            ghcr.io/usf272spring26/test-box-blox-wasm:0.0.2 \
+            tail -f /dev/null
+
+      - name: Copy student code into grading project
+        run: |
+          docker exec ci bash -c "
+            cp -r client/src/* /grading/client/src/
+            cp -r server/src/* /grading/server/src/
+            cp -r common/src/* /grading/common/src/
+          "
+
+      - name: Run fmt check
+        run: docker exec -w /grading ci cargo fmt --check
+
+      - name: Run Clippy - client
+        run: docker exec -w /grading/client ci cargo clippy -- -D warnings
+
+      - name: Run Clippy - server
+        run: docker exec -w /grading/server ci cargo clippy -- -D warnings
+
+      - name: Run server tests
+        run: docker exec -w /grading ci ./test-server.sh
