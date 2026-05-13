@@ -2,9 +2,13 @@
 
 use crate::ui::{BG_COLOR, PADDING};
 
+use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use common::board::*;
 use common::data::*;
+use common::protocol::*;
+use lightyear::prelude::MessageSender;
+use lightyear::prelude::client::*;
 
 // Create a logical tile to insert into a board.
 //
@@ -164,23 +168,101 @@ pub fn setup_hold_window(
 }
 
 /// Read the keyboard input and send it to the server as a message.
-pub fn handle_user_input() {
-    todo!()
+pub fn handle_user_input(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    sender: Option<Single<&mut MessageSender<Inputs>, (With<Client>, With<Connected>)>>,
+) {
+    let Some(mut sender) = sender else {
+        return;
+    };
+
+    let mut inputs = Inputs::default();
+
+    if keyboard.just_pressed(KeyCode::ArrowLeft) {
+        inputs.0.insert(Input::Left);
+    }
+    if keyboard.just_pressed(KeyCode::ArrowRight) {
+        inputs.0.insert(Input::Right);
+    }
+    if keyboard.just_pressed(KeyCode::ArrowDown) {
+        inputs.0.insert(Input::Down);
+    }
+    if keyboard.just_pressed(KeyCode::ArrowUp) || keyboard.just_pressed(KeyCode::Space) {
+        inputs.0.insert(Input::Rotate);
+    }
+    if keyboard.just_pressed(KeyCode::KeyX) {
+        inputs.0.insert(Input::Hold);
+    }
+    if keyboard.just_pressed(KeyCode::KeyZ) {
+        inputs.0.insert(Input::HardDrop);
+    }
+    if keyboard.just_pressed(KeyCode::Escape) {
+        inputs.0.insert(Input::EndGame);
+    }
+
+    if !inputs.0.is_empty() {
+        sender.send::<InputChannel>(inputs);
+    }
 }
 
 /// Redraw the board.
 pub fn redraw_board(
-    _commands: Commands,
-    _materials: ResMut<Assets<ColorMaterial>>,
-    _tetrominoes: Query<&Tetromino, With<Active>>,
-    _obstacles: Query<&Block, With<Obstacle>>,
-    // note: these are distinct from the obstacles
-    _board: Query<(&Block, Entity), With<MainBoard>>,
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    tetrominoes: Query<&Tetromino, With<Active>>,
+    obstacles: Query<&Block, With<Obstacle>>,
+    board: Query<(&Block, Entity), With<MainBoard>>,
 ) {
-    todo!()
+    let mut colors = HashMap::<Cell, Color>::new();
+
+    // Active piece cells
+    for tetromino in &tetrominoes {
+        for &cell in tetromino.cells() {
+            if cell.is_visible() {
+                colors.insert(cell, tetromino.color);
+            }
+        }
+    }
+
+    // Locked obstacle cells
+    for block in &obstacles {
+        if block.cell.is_visible() {
+            colors.insert(block.cell, block.color);
+        }
+    }
+
+    // Paint every board tile from composed color map
+    for (block, entity) in board {
+        let color = colors.get(&block.cell).copied().unwrap_or(BG_COLOR);
+        commands
+            .entity(entity)
+            .insert(MeshMaterial2d(materials.add(color)));
+    }
 }
 
 /// Redraw the side board with the given marker component.
-pub fn redraw_side_board<Marker: Component>() {
-    todo!()
+pub fn redraw_side_board<Marker: Component>(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    side_board: Query<(&Block, Entity), With<Marker>>,
+    tetromino: Option<Single<&Tetromino, With<Marker>>>,
+) {
+    let tetromino = tetromino.map(|t| *t);
+
+    for (block, entity) in side_board {
+        let side_board_cell = Cell(block.cell.0 - 2, block.cell.1 - 2);
+        let color = if let Some(t) = tetromino {
+            if t.cells().contains(&side_board_cell) {
+                t.color
+            } else {
+                BG_COLOR
+            }
+        } else {
+            BG_COLOR
+        };
+
+        commands
+            .entity(entity)
+            .insert(MeshMaterial2d(materials.add(color)));
+    }
 }

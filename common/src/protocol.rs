@@ -5,8 +5,7 @@ use std::collections::HashSet;
 use bevy::prelude::*;
 use lightyear::connection::prelude::NetworkDirection;
 use lightyear::prelude::{
-    AppChannelExt, AppComponentExt, AppMessageExt, ChannelMode, ChannelSettings,
-    ReliableSettings,
+    AppChannelExt, AppComponentExt, AppMessageExt, ChannelMode, ChannelSettings, ReliableSettings,
 };
 use serde::{Deserialize, Serialize};
 

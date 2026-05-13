@@ -27,7 +27,7 @@ impl Plugin for MyClientPlugin {
         app.add_systems(
             Update,
             (
-                // send_input.run_if(can_send_message::<InputChannel>),
+                ::client::board::handle_user_input.run_if(can_send_message::<Inputs>),
                 send_heartbeat
                     .run_if(on_timer(HEARTBEAT_INTERVAL))
                     .run_if(can_send_message::<Heartbeat>),
@@ -67,7 +67,7 @@ fn spawn_client(mut commands: Commands, cfg: Res<GameConfig>) {
             RawClient,
             LocalAddr(client_addr),
             PeerAddr(server_addr),
-            WebSocketClientIo::from_addr(ClientConfig, WebSocketScheme::Plain),
+            WebSocketClientIo::from_addr(ClientConfig::default(), WebSocketScheme::Plain),
             Link::new(None),
             ReplicationReceiver::default(),
         ))
