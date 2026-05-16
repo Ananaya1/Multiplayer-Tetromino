@@ -27,7 +27,7 @@ impl Plugin for MyClientPlugin {
         app.add_systems(
             Update,
             (
-                ::client::board::handle_user_input.run_if(can_send_message::<Inputs>),
+                // send_input.run_if(can_send_message::<InputChannel>),
                 send_heartbeat
                     .run_if(on_timer(HEARTBEAT_INTERVAL))
                     .run_if(can_send_message::<Heartbeat>),

@@ -42,7 +42,7 @@ pub struct Block {
 }
 
 /// A timer to count down when a piece must be inactivated after it can't be pushed down
-#[derive(Component, Serialize, Deserialize, PartialEq)]
+#[derive(Component)]
 pub struct LockdownTimer(pub Option<Timer>);
 
 impl LockdownTimer {

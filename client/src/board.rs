@@ -187,7 +187,7 @@ pub fn handle_user_input(
     if keyboard.just_pressed(KeyCode::ArrowDown) {
         inputs.0.insert(Input::Down);
     }
-    if keyboard.just_pressed(KeyCode::ArrowUp) || keyboard.just_pressed(KeyCode::Space) {
+    if keyboard.any_just_pressed([KeyCode::ArrowUp, KeyCode::Space]) {
         inputs.0.insert(Input::Rotate);
     }
     if keyboard.just_pressed(KeyCode::KeyX) {

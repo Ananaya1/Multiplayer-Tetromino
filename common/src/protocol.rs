@@ -9,7 +9,7 @@ use lightyear::prelude::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::board::{Block, LockdownTimer};
+use crate::board::Block;
 use crate::data::{Active, Hold, Next, Obstacle, SharedGameState, Tetromino};
 
 /// Channel for keyboard inputs to send over the network.
@@ -43,13 +43,12 @@ pub struct ProtocolPlugin;
 impl Plugin for ProtocolPlugin {
     fn build(&self, app: &mut App) {
         app.register_component::<SharedGameState>();
-        app.register_component::<LockdownTimer>();
         app.register_component::<Tetromino>();
+        app.register_component::<Block>();
         app.register_component::<Active>();
         app.register_component::<Next>();
-        app.register_component::<Hold>();
-        app.register_component::<Block>();
         app.register_component::<Obstacle>();
+        app.register_component::<Hold>();
 
         app.add_channel::<InputChannel>(ChannelSettings {
             mode: ChannelMode::SequencedReliable(ReliableSettings::default()),
