@@ -67,7 +67,7 @@ fn spawn_client(mut commands: Commands, cfg: Res<GameConfig>) {
             RawClient,
             LocalAddr(client_addr),
             PeerAddr(server_addr),
-            WebSocketClientIo::from_addr(ClientConfig::default(), WebSocketScheme::Plain),
+            WebSocketClientIo::from_addr(ClientConfig, WebSocketScheme::Plain),
             Link::new(None),
             ReplicationReceiver::default(),
         ))
