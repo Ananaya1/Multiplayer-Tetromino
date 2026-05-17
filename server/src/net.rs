@@ -1,8 +1,11 @@
 //! The networking code, the bulk of the server.
 
+use crate::{controlled_by, replicate_to};
 use bevy::prelude::*;
 use bevy::time::common_conditions::on_timer;
+use common::board::{LockdownTimer, ReceivedInput};
 use common::config::GameConfig;
+use common::data::Next;
 use common::protocol::*;
 use common::*;
 use core::net::SocketAddr;
@@ -90,24 +93,55 @@ pub fn handle_new_client(trigger: On<Add, LinkOf>, mut commands: Commands, cfg: 
 pub fn handle_connected(
     trigger: On<Add, Connected>,
     peer_ids: Query<&RemoteId, With<ClientOf>>,
-    _cfg: Res<GameConfig>,
-    _commands: Commands,
+    cfg: Res<GameConfig>,
+    mut commands: Commands,
 ) {
     let client_id = peer_ids
         .get(trigger.entity)
         .expect("Possible networking stack bug: Client connected with no remote ID!");
     info!("Client {:?} ({:?}) connected", trigger.entity, client_id);
+    let client = trigger.entity;
+    let mut private = cfg.build_private_game_state();
+    let shared = cfg.build_shared_game_state();
+    // Only the per-client state and the first preview piece are spawned here.
+    // The active piece is created by `spawn_next_tetromino` on the next tick,
+    // which keeps the gravity timer in phase with piece spawns.
+    let mut next = private.bag.peek();
+    crate::game_logic::place_preview(&mut next);
 
-    todo!("spawn global state related to this client, replicate the parts that make sense.")
+    commands.spawn((
+        shared,
+        private,
+        LockdownTimer(None),
+        controlled_by(client),
+        replicate_to(client, &peer_ids),
+    ));
+    commands.spawn((
+        next,
+        Next,
+        controlled_by(client),
+        replicate_to(client, &peer_ids),
+    ));
 }
 
 /// Apply received Direction messages to the block position each frame.
 /// All receivers are drained, but movement is only applied for the block owner.
 pub fn handle_input(
-    _receivers: Query<(Entity, &mut MessageReceiver<Inputs>)>,
-    _commands: Commands,
+    mut receivers: Query<(Entity, &mut MessageReceiver<Inputs>)>,
+    mut commands: Commands,
 ) {
-    todo!("drain all receivers, trigger ReceivedInput for each relevant client.")
+    for (client, mut receiver) in &mut receivers {
+        let mut merged = Inputs::default();
+        for message in receiver.receive() {
+            merged.0.extend(message.0.iter().copied());
+        }
+        if !merged.0.is_empty() {
+            commands.trigger(ReceivedInput {
+                inputs: merged,
+                target: client,
+            });
+        }
+    }
 }
 
 /// Refresh clients that send a heartbeat signal
