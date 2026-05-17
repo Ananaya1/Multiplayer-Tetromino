@@ -30,8 +30,10 @@ pub fn update_score(event: On<LinesCleared>, states: Query<(&mut SharedGameState
     state.score += points * multiplier;
     state.lines_cleared += event.lines_cleared;
     state.lines_cleared_since_last_level += event.lines_cleared;
-    while state.lines_cleared_since_last_level >= 10 {
+    if state.lines_cleared_since_last_level >= (state.level + 1) * 10 {
+        state.lines_cleared_since_last_level -= (state.level + 1) * 10;
         state.level += 1;
-        state.lines_cleared_since_last_level -= 10;
+        let next_interval = state.drop_interval();
+        state.gravity_timer.set_duration(next_interval);
     }
 }

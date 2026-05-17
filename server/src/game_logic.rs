@@ -223,17 +223,11 @@ pub fn spawn_next_tetromino(
 /// moved down using naive gravity (the obstacles move down only by the number
 /// of lines below them that are deleted).
 pub fn delete_full_lines(
-    mut obstacles: Query<((Entity, &mut Block), &ControlledBy), With<Obstacle>>,
+    obstacles: Query<((Entity, &mut Block), &ControlledBy), With<Obstacle>>,
     mut commands: Commands,
 ) {
     use std::collections::{BTreeSet, HashMap};
-    let mut by_client: HashMap<Entity, Vec<(Entity, Mut<Block>)>> = HashMap::new();
-    for ((entity, block), controlled_by) in &mut obstacles {
-        by_client
-            .entry(controlled_by.owner)
-            .or_default()
-            .push((entity, block));
-    }
+    let by_client = build_per_client_lists(obstacles);
 
     for (client, mut blocks) in by_client {
         let mut row_counts: HashMap<i32, usize> = HashMap::new();
@@ -261,17 +255,6 @@ pub fn delete_full_lines(
             target: client,
         });
     }
-}
-
-/// Top-left corner of the hold window, where a held piece is parked.
-const HOLD_WINDOW_LEFT: i32 = 1;
-/// Top-left corner of the hold window, where a held piece is parked.
-const HOLD_WINDOW_TOP: i32 = 3;
-
-/// Translate a tetromino so its bounding box top-left lands on `(left, top)`.
-fn move_top_left_to(t: &mut Tetromino, left: i32, top: i32) {
-    let b = t.bounds();
-    t.shift(left - b.left, top - b.top);
 }
 
 /// Swap the current piece and the piece in the hold window on user input.
@@ -304,14 +287,24 @@ pub fn swap_hold(
         return;
     };
     let old_active = *active_t;
-    let old_bounds = old_active.bounds();
+    let old_center = old_active.center;
     let obstacle_list: Vec<Block> = filter_controlled_by(obstacles, client).copied().collect();
 
-    // The incoming piece is parked at the old active piece's top-left corner,
+    // The outgoing active piece is parked centered in the hold window.
+    let mut new_hold = old_active;
+    new_hold.shift(
+        PREVIEW_SPAWN_X - new_hold.center.0.floor() as i32,
+        PREVIEW_SPAWN_Y - new_hold.center.1.floor() as i32,
+    );
+
+    // The incoming piece is centered on the old active piece's center, then
     // kicked up by up to 4 rows until it no longer collides.
     let try_place = |mut candidate: Tetromino| -> Option<Tetromino> {
-        move_top_left_to(&mut candidate, old_bounds.left, old_bounds.top);
-        for _ in 0..=4 {
+        candidate.shift(
+            old_center.0 as i32 - candidate.center.0 as i32,
+            old_center.1 as i32 - candidate.center.1 as i32,
+        );
+        for _ in 0..5 {
             if !there_is_collision(&candidate, obstacle_list.iter()) {
                 return Some(candidate);
             }
@@ -325,8 +318,6 @@ pub fn swap_hold(
         let Some(new_active) = try_place(*hold_t) else {
             return;
         };
-        let mut new_hold = old_active;
-        move_top_left_to(&mut new_hold, HOLD_WINDOW_LEFT, HOLD_WINDOW_TOP);
         *active_t = new_active;
         *hold_t = new_hold;
     } else {
@@ -342,8 +333,6 @@ pub fn swap_hold(
             return;
         };
 
-        let mut new_hold = old_active;
-        move_top_left_to(&mut new_hold, HOLD_WINDOW_LEFT, HOLD_WINDOW_TOP);
         *active_t = new_hold;
         commands
             .entity(active_entity)
