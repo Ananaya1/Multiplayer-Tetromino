@@ -54,6 +54,7 @@ pub fn build_app(app: &mut App, cfg: config::GameConfig) {
     .add_systems(
         Update,
         (
+            handle_user_input,
             redraw_board,
             redraw_side_board::<Next>,
             redraw_side_board::<Hold>,
