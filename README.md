@@ -22,15 +22,6 @@ order to move onto the next milestone.
 Based on the lines I removed from my implementation, you will need to write
 300--350 lines of code, most of this will be porting your existing code.
 
-## Deadlines
-
-- Soft deadline: Monday, April 13 (right before the Spring break).
-- Hard deadline: Monday, April 20.
-    - This is the last day for you to **pass all code reviews** and schedule an
-      interactive grading session.
-    - Note: The gap between soft and hard deadlines will shrink for future
-      assignments because there is a hard deadline imposed by the university at
-      the end of the semester.
 
 ## Setup
 
@@ -250,60 +241,6 @@ if this warning fails to go away though and you're not sure what to do feel free
 to open an issue at https://github.com/wasm-bindgen/wasm-bindgen/issues!
 ```
   
-## AI use policy
 
-The following uses of generative AI tools are OK for this milestone:
-- Debugging a particular compiler error,
-- Generating **small** code snippets as long as you have proper attribution (see
-  the next bullet point),
-  - If you aren't sure what _small_ is, reach out to the professor for
-    confirmation
-- Generating test cases for an implementation (any AI-generated or other
-  external code must have proper attribution, e.g. via a comment `//from:
-  <source>`), and
-- Asking an AI tool "how do I do this?" or "what does this part of the code
-  do?".
-
-Most of the code you submit as part of your implementation (i.e., anything that
-is not a test) must be produced directly by you, and anything you haven't
-produced directly must have proper attribution.  The AI use policy will get
-relaxed over time, this is to ensure that you build a solid baseline before
-using such tools so that you can thrive in this class rather than getting stuck
-later.
-
-## Grading
-
-To pass this assignment, you need to:
-
-1. Pass all the tests for all features,
-2. Have your code pass `cargo fmt --check` and `cargo clippy`.
-3. Pass code review.
-4. Pass interactive grading.
-
-For the code review, you have to work on a **non-main** branch and open a PR
-when you want to test your implementation against GitHub actions.
-
-### Code review
-
-After you are done with step 2, you need to request code review.  The hard
-deadline for this assignment is the deadline to **get approval and merge all
-your PRs**.
-
-After you are assigned a reviewer, they will review your code and request
-explanations and/or changes.  Once you satisfy all these, yuo pass the code
-review.  After you are done witch each set of changes, you need to ping the
-reviewer on GitHub to ask for another round of code review until they approve
-your changes.
-
-### Interactive grading
-
-After passing the code reviews, you have to go through an interactive grading
-session.  This will be a 30-minute interview (i.e., oral exam) where you (1)
-explain how your code works, the design decisions you made, and what approaches
-you tried have not worked and (2) do a live demo of your game.
-
-If you fail interactive grading once, you can do it again with me.  If you fail
-it twice, you fail the whole assignment.  The objective of the assignment is to
-show that **you have developed a certain understanding** and interactive
-grading is where you will be able to demonstrate that.
+where you will be able to demonstrate that.
 
